@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-info">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<form method=post>
+	<div class="submit-form">
+		{% if not submitted %}
+          <table width=100%>
+            <tr>
+              <td style="text-align: left;">Title:</td>
+              <td style="text-align: left;">
+                <input type="text" size="40" name="title" value="{{ request.form['title'] or route['title'] }}" />
+              </td>
+              <td style="text-align: left;">Date:</td>
+              <td style="text-align: left;">
+                <input type="text" name="date" value="{{ request.form['date'] or route['date'] }}" />
+              </td>
+            </tr>
+            <tr>
+              <td style="text-align: left;">Owner:</td>
+              <td style="text-align: left;" colspan=3>
+                <input type="text" size="40" name="owner" value="{{ request.form['owner'] or route['owner'] }}" />
+              </td>
+            </tr>
+            <tr>
+              <td style="text-align: left;">Distance:</td>
+              <td style="text-align: left;" >
+                <input type="text" name="distance" size="6" value="{{ request.form['distance'] or route['distance'] }}" />
+              </td>
+              <td style="text-align: left;">Time:</td>
+              <td style="text-align: left;" >
+                <input type="text" name="duration" size="6" value="{{ request.form['duration'] or route['duration'] }}" />
+              </td>
+            </tr>
+            <tr>
+              <td style="text-align: left;">Map URL:</td>
+              <td style="text-align: left;" colspan=3>
+                <input type="text" name="map_url" size="50" value="{{ request.form['map_url'] or route['map_url'] }}" />
+              </td>
+            </tr>
+          </table>
+          <br>
+          <p style="text-align: left;">Description (use HTML): </p>
+          <textarea style="text-align: left;" name="description" rows=5 cols=80 >
+{{ request.form['description'] or route['description'] }}
+		  </textarea>
+
+          <br>
+          <p style="text-align: left;"><br>Route Instructions (<b>format Milage|Instruction or -|Note or #| page break</b>):
+		  </p>
+		    
+          <textarea style="text-align: left;" name="route" rows=18 cols=80 >
+0.00|Start of event
+-|Replace this text with proper event text
+{{ request.form['route'] or route['route'] }}
+		  </textarea>
+
+          <br>
+          <p style="text-align: left;">Footer (use HTML): </p>
+          <textarea style="text-align: left;" name="footer" rows=13 cols=80 >
+{{ request.form['footer'] or route['footer'] }}
+		  </textarea>
+
+          <br>
+          <p style="text-align: left;">Info (use HTML): </p>
+          <textarea style="text-align: left;" name="info" rows=6 cols=80 >
+{{ request.form['info'] or route['info'] }}
+		  </textarea>
+<br>
+		  <table>
+		  <tr>
+		  <td><input type="submit" name="action" class="btn btn-primary" value="Submit"></td>
+          <td><input type="submit" name="action" class="btn btn-primary" value="Print"></td>
+		  </tr>
+		  </table>
+
+		  <!--
+		  <button type="submit" class="btn btn-primary">Submit</button>
+          <button @click="saveRoute" class="btn btn-success">Submit</button>
+		  -->
+        </div>
+
+        {% else %}
+            <h4>You successfully saved the new route!</h4>
+            <button class="btn btn-success" @click="newRoute">Add</button>
+        {% endif %}
+    </div>
+</form>
+{% endblock %}

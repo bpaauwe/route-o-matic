@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block content %}
+	<h1>{% block title %} Welcome to Route-O-Matic {% endblock %}</h1>
+	<p>
+	Select the route you want from the drop down menu.  You can then either
+	edit it or generate a print ready page for the route.
+	</p>
+	<form method="POST">
+	<div class="row">
+    <div class="col-md-12">
+      <div class="input-group mb-3">
+		<table>
+		<tr>
+		<td>
+        <select name="Route" id="Route">
+		{% for route in routes %}
+			{% if last_id == route['id'] %}
+			<option selected value="{{route['id']}}">{{route['id']}} - {{route['title']}}</option>
+			{% else %}
+			<option value="{{route['id']}}">{{route['id']}} - {{route['title']}}</option>
+			{% endif %}
+		{% endfor %}
+        </select>
+		</td>
+		<td><input type="submit" name="action" class="btn btn-primary" value="Edit"></td>
+		<td><input type="submit" name="action" class="btn btn-primary" value="Copy"></td>
+		<td><input type="submit" name="action" class="btn btn-primary" value="Printable"></td>
+		<td><input type="submit" name="action" class="btn btn-primary" value="Delete"></td>
+		</tr>
+		<tr>
+		<td colspan=5>
+		<textarea style="text-align: left;" name="r_desc" id="r_desc" rows=10 cols=80 >
+        </textarea>
+		</td>
+		</tr>
+		</table>
+      </div>
+    </div>
+  </div>
+  </form>
+{% endblock %}
+
+{% block scripts %}
+<script charset="utf-8" type="text/javascript">
+	$(function() {
+		var route_select = $('#Route'),
+			textarea = $('#r_desc');
+
+		route_select.on('change', function() {
+			getRouteDescription();
+		});
+
+		function getRouteDescription() {
+			var send = { route: route_select.val() };
+
+			$.get("/_get_description", send, function(response) {
+				textarea.val(response);
+			});
+		}
+	});
+</script>
+{% endblock scripts %}

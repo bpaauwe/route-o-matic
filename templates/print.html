@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row row-no-gutters">
+    <!-- List of existing routes (left side of screen) -->
+    <div class="col-md-12">
+      <div class="printable">
+        <table width=100%>
+          <tr>
+            <td align=left>{{currentRoute.owner}}</td>
+            <td align=middle><strong>{{currentRoute.title}}</strong></td>
+            <td align=right>{{currentRoute.date}}</td>
+          </tr>
+          <tr> <td colspan=3>&nbsp;</td> </tr>
+          <tr>
+            <td colspan=3>
+              {{currentRoute.description|safe}}
+            </td>
+          </tr>
+        </table>
+		<div>{{currentRoute.route.toHTML()|safe}}</div>
+        <div>{{currentRoute.footer|safe}}</div>
+        <div>{{currentRoute.info|safe}}</div>
+      </div>
+    </div>
+</div>
+
+{% endblock %}
