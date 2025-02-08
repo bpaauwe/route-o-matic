@@ -18,14 +18,15 @@
             </td>
           </tr>
         </table>
-		{% if format == 'default' %}
+		{% if format == 'HTML' %}
 			<div>{{currentRoute.route.toHTML()|safe}}</div>
-		{% endif %}
-		{% if format == 'PCA' %}
+		{% elif format == 'PCA' %}
 			<div>{{currentRoute.route.toPCAFormat()|safe}}</div>
-		{% endif %}
-		{% if format == 'RM' %}
+		{% elif format == 'RM' %}
 			<div>{{currentRoute.route.toRallyMaster()|safe}}</div>
+		{% else %}
+			Using format // {{format}} //
+			<div>{{currentRoute.route.toHTML()|safe}}</div>
 		{% endif %}
         <div>{{currentRoute.footer|safe}}</div>
       </div>

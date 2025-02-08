@@ -9,11 +9,6 @@ app.config['SECRET_KEY'] = '3asdfki5489907asLJO8dka378'
 @app.context_processor
 def inject_verions():
     return dict(version="Version 3.0.0", date="02/08/2025")
-@app.context_processor
-def inject_format():
-    # default, PCA, RM
-    return dict(format="default")
-
 
 log = open('log.txt', 'w')
 last_id = 0
@@ -109,10 +104,14 @@ class ROUTE:
                 extra = parts[2]
             else:
                 extra = ''
+
             if miles == '-':
                 new_line = td_l.format('&nbsp;') + td_n.format('&nbsp;') + td_i.format(text) + td_x.format(extra)
-            elif miles == 'rm' and flag:
-                new_line = td_l.format('') + td_n.format('') + td_i.format(text) + td_x.format(extra)
+            elif (miles == 'RM' or miles == 'rm') and flag:
+                new_line = td_l.format(num) + td_n.format('') + td_i.format(text) + td_x.format(extra)
+            elif miles == 'RM' or miles == 'rm':
+                # ignore these lines
+                new_line = ''
             else: # must be a mileage
                 new_line = td_l.format(num) + td_n.format(miles) + td_i.format(text) + td_x.format(extra)
         else:  # Instruction, but no milage
@@ -207,7 +206,7 @@ def routes():
         elif request.form['action'] == 'Printable':
             log_it(f'User wants to print the route')
             last_id = route_id
-            return redirect(url_for(f'print_route', id=route_id))
+            return redirect(url_for(f'print_route', id=route_id, format="HTML"))
         elif request.form['action'] == 'Copy':
             log_it(f'User wants to make a copy of the route')
             return redirect(url_for(f'add_new', id=route_id))
@@ -296,16 +295,18 @@ def edit(id):
             conn.close()
             return redirect(url_for(f'edit', id=id))
         elif request.form['action'] == 'Print':
-            return redirect(url_for(f'print_route', id=id))
+            select = request.form.get('printFormat')
+            print(f"User wants to print using {select}")
+            return redirect(url_for(f'print_route', id=id, format=select))
 
     return render_template('add.html', route=r)
 
-@app.route('/print/<int:id>')
-def print_route(id):
+@app.route('/print/<int:id>/<string:format>')
+def print_route(id, format):
     currentRoute = dict(get_route(id)[0])
     currentRoute['route'] = ROUTE(currentRoute['route'])
 
-    return render_template('print.html', currentRoute=currentRoute)
+    return render_template('print.html', currentRoute=currentRoute, format=format)
 
 @app.route('/about')
 def about():

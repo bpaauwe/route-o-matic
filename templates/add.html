@@ -41,9 +41,31 @@
             </tr>
             <tr>
               <td style="text-align: left;">Map URL:</td>
-              <td style="text-align: left;" colspan=3>
+              <td style="text-align: left;" colspan=>
                 <input type="text" name="map_url" size="50" value="{{ request.form['map_url'] or route['map_url'] }}" />
               </td>
+              <td style="text-align: left;">Print:</td>
+			  <td style="text-align: left;">
+				<select name="printFormat", id="printFormat">
+					{% if printformat == 'default' %}
+						<option selected value="HTML"">default</option>
+					{% else %}
+						<option value="HTML"">default</option>
+					{% endif %}
+
+					{% if printformat == 'PCA' %}
+						<option selected value="PCA"">Spreadsheet</option>
+					{% else %}
+						<option value="PCA"">Spreadsheet</option>
+					{% endif %}
+
+					{% if printformat == 'RM' %}
+						<option selected value="PCA"">RallyMaster</option>
+					{% else %}
+						<option value="RM"">RallyMaster</option>
+					{% endif %}
+				</select>
+			</td>
             </tr>
           </table>
           <br>
@@ -57,9 +79,12 @@
 		  </p>
 		    
           <textarea style="text-align: left;" name="route" rows=18 cols=80 >
+{% if request.form['route'] or route['route'] %}
+{{ request.form['route'] or route['route'] }}
+{% else %}
 0.00|Start of event
 -|Replace this text with proper event text
-{{ request.form['route'] or route['route'] }}
+{% endif %}
 		  </textarea>
 
           <br>
