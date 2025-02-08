@@ -6,6 +6,11 @@ from flask import request, url_for, flash, redirect
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '3asdfki5489907asLJO8dka378'
 
+@app.context_processor
+def inject_verions():
+    return dict(version="Version 3.0.0", date="02/08/2025")
+
+
 log = open('log.txt', 'w')
 last_id = 0
 
