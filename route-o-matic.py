@@ -9,6 +9,10 @@ app.config['SECRET_KEY'] = '3asdfki5489907asLJO8dka378'
 @app.context_processor
 def inject_verions():
     return dict(version="Version 3.0.0", date="02/08/2025")
+@app.context_processor
+def inject_format():
+    # default, PCA, RM
+    return dict(format="default")
 
 
 log = open('log.txt', 'w')
@@ -74,30 +78,100 @@ class ROUTE:
     def __init__(self, raw):
         self.raw = raw
 
+    '''
+    Process a route instruction line
+    '''
+    def line_processor(self, line, line_no, flag):
+        td_l = '<tr><td style="padding-right: 10px" align="right">{}</td>'
+        td_n = '<td style="padding-right: 10px" align="right">{}</td>'
+        td_i = '<td style="padding-left: 10px" align="left">{}</td>'
+        td_x = '<td style="padding-left: 10px" align="left">{}</td></tr>\n'
+
+        # a line is supposed to look like <code|mileage>|<text>
+        # where code is '-' for note, and 'rm' for rallymaster note
+        parts = line.split('|')
+        num = line_no + 1
+
+        if len(parts) > 1:
+            miles = parts[0]
+            text = parts[1]
+            text = text.replace('LEFT','<b>LEFT</b>')
+            text = text.replace('RIGHT','<b>RIGHT</b>')
+            text = text.replace('STRAIGHT','<b>STRAIGHT</b>')
+            text = text.replace('SIGNAL','<b>SIGNAL</b>')
+            text = text.replace('STOP','<b>STOP</b>')
+            text = text.replace('T ','<b>T </b>')
+            text = text.replace('Y ','<b>Y </b>')
+            text = text.replace('Y.','<b>Y.</b>')
+            text = text.replace('Y,','<b>Y,</b>')
+            text = text.replace('CAST','<b>CAST</b>')
+            if len(parts) > 2:
+                extra = parts[2]
+            else:
+                extra = ''
+            if miles == '-':
+                new_line = td_l.format('&nbsp;') + td_n.format('&nbsp;') + td_i.format(text) + td_x.format(extra)
+            elif miles == 'rm' and flag:
+                new_line = td_l.format('') + td_n.format('') + td_i.format(text) + td_x.format(extra)
+            else: # must be a mileage
+                new_line = td_l.format(num) + td_n.format(miles) + td_i.format(text) + td_x.format(extra)
+        else:  # Instruction, but no milage
+            miles = ''
+            text = parts[0]
+            text = text.replace('LEFT','<b>LEFT</b>')
+            text = text.replace('RIGHT','<b>RIGHT</b>')
+            text = text.replace('STRAIGHT','<b>STRAIGHT</b>')
+            text = text.replace('SIGNAL','<b>SIGNAL</b>')
+            text = text.replace('STOP','<b>STOP</b>')
+            text = text.replace('T ','<b>T </b>')
+            text = text.replace('Y ','<b>Y </b>')
+            text = text.replace('Y.','<b>Y.</b>')
+            text = text.replace('Y,','<b>Y,</b>')
+            text = text.replace('CAST','<b>CAST</b>')
+            new_line = td_l.format(num) + td_n.format(miles) + td_i.format(text) + td_x.format('')
+
+        return new_line
+
+
     def toHTML(self):
         lines = self.raw.split('\n')
 
         html = '<table style="width: 100%">'
         for l in range(0, len(lines)):
             lines[l] = lines[l].replace('\r', '')
-            parts = lines[l].split('|')
-            if len(parts) > 1:
-                miles = parts[0]
-                text = parts[1]
-                if miles == '-':
-                    new_line = '<tr><td></td><td style="padding-right: 10px" align="right"></td><td>{}</td></tr>'.format(text)
-                else:
-                    new_line = '<tr><td>{}.</td><td style="padding-right: 10px" align="right">{}</td><td>{}</td></tr>'.format((l+1), miles, text)
-            else:
-                miles = ''
-                text = parts[0]
-                new_line = '<tr><td>{}.</td><td style="padding-right: 10px" align="righ">{}</td><td>{}</td></tr>'.format((l+1), miles, text)
-            #html = html + new_line.replace(' ', '&nbsp;')
+            new_line = self.line_processor(lines[l], l, False)
+            #print(new_line)
             html = html + new_line
 
         html = html + '</table>'
 
         return html
+
+    def toRallyMaster(self):
+        lines = self.raw.split('\n')
+
+        html = '<table style="width: 100%">'
+        for l in range(0, len(lines)):
+            lines[l] = lines[l].replace('\r', '')
+            new_line = self.line_processor(lines[l], l, True)
+            html = html + new_line
+
+        html = html + '</table>'
+        return html
+
+    def toPCAFormat(self):
+        lines = self.raw.split('\n')
+        print('In toPCAFormat...')
+
+        html = '<table border="1" style="width: 100%">'
+        for l in range(0, len(lines)):
+            lines[l] = lines[l].replace('\r', '')
+            new_line = self.line_processor(lines[l], l, False)
+            html = html + new_line
+
+        html = html + '</table>'
+        return html
+
 
 
 @app.route('/', methods=('GET', 'POST'))
@@ -230,8 +304,6 @@ def edit(id):
 def print_route(id):
     currentRoute = dict(get_route(id)[0])
     currentRoute['route'] = ROUTE(currentRoute['route'])
-
-    log_it(currentRoute['route'].toHTML())
 
     return render_template('print.html', currentRoute=currentRoute)
 
