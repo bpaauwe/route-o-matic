@@ -234,6 +234,10 @@ def print_route(id):
 def about():
     return render_template('about.html')
 
+@app.route('/docs')
+def docs():
+    return render_template('docs.html')
+
 @app.route('/_get_description')
 def get_description():
 

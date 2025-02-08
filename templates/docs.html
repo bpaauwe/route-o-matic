@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Route-O-Matic Documentation</h1>
+
+	<h2>Adding a new route</h2>
+	<p>
+	To add a new route to the database, select "New Route" from the navigation
+	menu at the top of the page.  This will open a blank form for you to enter
+	the route/event information.
+	</p>
+	<dl>
+		<dt>Title</dt>
+		<dd>This is the name of the event/route.  It is required.  This will
+		be used as part of the header when the instructions are printed.
+		</dd>
+
+		<dt>Owner</dt>
+		<dd>This is the name of the event owner/organizer. This will also be
+		displayed as part of the instruction header.</dd>
+
+		<dt>Date</dt>
+		<dd>The date of the event (if known). Format is up to you. Displayed as
+		part of the instruction header.</dd>
+
+		<dt>Distance</dt>
+		<dd>How long is the event in miles.  This is not printed as part of 
+		the instructions and is purely information.</dd>
+
+		<dt>Duration</dt>
+		<dd>How long does it take to run the event.  Format should be HH:MM (hours and
+		minutes). This is also just informational and not printed on the
+		instructions.</dd>
+
+		<dt>Description</dt>
+		<dd>A brief description of the event.  This may include things like the
+		event start location and time. It is part of the printed route instructions
+		and is displayed above the actual route.</dd>
+
+		<dt>Route</dt>
+		<dd>This is where you enter the actual route instructions. Typically one 
+		line per instruction. There are 3 basic types of instructions that are
+		recognized by the application.  Instructions with a mileage, instructions
+		without a milage and note type instructions.
+		<p>
+		Instructions and mileages are separated by a '|' character.  Thus you 
+		can enter a milage based instruction as <i>1.0|Turn RIGHT on Birch St.</i>.
+		For instructions without mileages, simply leave the mileage blank. I.E. 
+		<i>|Turn LEFT on Walnut St.</i>. Note type entries allow you to add
+		informational notes embedded within the instructions. To enter a note
+		replace the mileage with a '-' character. For example <i>-|If you look to your
+		left, you'll see something interesting</i>. Use <i>-|</i> to create blank
+		lines in the instructions.
+		</dd>
+
+		<dt>Footer</dt>
+		<dd>This area is used to supply information below the route instructions. You'd
+		typically use this to describe the finish location.</dd>
+
+		<dt>Info</dt>
+		<dd>Rallymaster/event information that is not part of the route instructions.</dd>
+	</dl>
+
+	Once you have entered all the information about the event, click the Submit 
+	button to save the event in the database.
+
+	<h2>Editing an existing event</h2>
+	If you select an event from the event list and click the Edit button, you 
+	are shown a form with the existing event information displayed.  This form
+	is the same as the form displayed when adding a new event.  You may make
+	any changes necessary and when done, click the Submit button to save the
+	changes.
+	<p>
+	If you decide you don't want to make the changes, you can simply click 
+	"Route-O-Matic" in the navigation header to go back to the main screen.
+
+	<h2>Copying an event</h2>
+	If you want to create a new event that is similar to an existing event
+	you can copy that existing event.  Select the event you want to copy from
+	the event list and click the Copy button.  You are then shown the event
+	edit screen with the event details.  You may then make the changes needed
+	for the new event.  When you click the Submit button, a new event will be
+	created.
+
+	<h2>Printing an event</h2>
+	Select an event from the event list and click the Printable button.  This
+	will display the event in a format suitable for sending to a printer. Use
+	the browsers print option to print this page. These are the instructions
+	you will provide to your participants.
+
+	<h2>Deleting an event</h2>
+	Deletes an event from the database.
+
+{% endblock %}
