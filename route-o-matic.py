@@ -95,7 +95,7 @@ class ROUTE:
             text = text.replace('STRAIGHT','<b>STRAIGHT</b>')
             text = text.replace('SIGNAL','<b>SIGNAL</b>')
             text = text.replace('STOP','<b>STOP</b>')
-            text = text.replace('T ','<b>T </b>')
+            text = text.replace(' T ','<b> T </b>')
             text = text.replace('Y ','<b>Y </b>')
             text = text.replace('Y.','<b>Y.</b>')
             text = text.replace('Y,','<b>Y,</b>')
@@ -329,6 +329,15 @@ def delete_route(id):
     if request.method == 'POST':
         if request.form['action'] == 'Delete':
             print(f'user confirmed they want to delete {id}')
+            conn = get_db_connection()
+            try:
+                conn.execute(f'DELETE from routes where id = {id}')
+                conn.commit()
+            except sqlite3.Error as er:
+                print(er.sqlite_errorcode)
+                print(er.sqlite_errorname)
+                flash(f'Route delete failed! {er.sqlite_errorname}')
+            conn.close()
         else:
             print(f'user confirmed they dont want to delete {id}')
         return redirect(url_for(f'routes'))
