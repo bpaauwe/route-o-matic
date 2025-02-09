@@ -2,6 +2,7 @@ import sqlite3
 from flask import Flask
 from flask import render_template
 from flask import request, url_for, flash, redirect
+from waitress import serve
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '3asdfki5489907asLJO8dka378'
@@ -10,15 +11,16 @@ app.config['SECRET_KEY'] = '3asdfki5489907asLJO8dka378'
 def inject_verions():
     return dict(version="Version 3.0.0", date="02/08/2025")
 
-log = open('log.txt', 'w')
+#log = open('log.txt', 'w')
 last_id = 0
 
 def log_it(it):
-    log.write(f'{it}\n')
-    log.flush()
+    print(it)
+    #log.write(f'{it}\n')
+    #log.flush()
 
 def get_db_connection():
-    conn = sqlite3.connect('route_db.db')
+    conn = sqlite3.connect('/volume1/route-o-matic-new/route_db.db')
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -345,3 +347,9 @@ def delete_route(id):
     route = dict(get_route(id)[0])
     info = {'id': id, 'title': route['title']}
     return render_template('delete.html', info=info)
+
+
+if __name__ == "__main__":
+    #app.run(host='0.0.0.0')
+    serve(app, host='0.0.0.0', port=8201)
+
