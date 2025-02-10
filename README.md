@@ -4,15 +4,16 @@ The latest version of Route-O-Matic is writen in Python/flask. To start the
 server:
 
 ```
-flask run  --port=8201 --host=0.0.0.0
+python3 route-o-matic.py 
 ```
 
-The port option can be any available port. The host option allows this server
-to be accessed by other computers on the network
+This now uses waitress since it is supposed to be a production server for
+flask based apps. route-o-matic.py embeds the port number which by default
+is 8200.
 
-by default, this would be accessed with:
+The port can be changed by editing route-o-matic.py. 
 
 ```
-http://192.168.92.100:8201
+http://192.168.92.100:8200
 ```
 
