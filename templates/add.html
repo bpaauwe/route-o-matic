@@ -70,34 +70,29 @@
           </table>
           <br>
           <p style="text-align: left;">Description (use HTML): </p>
-          <textarea style="text-align: left;" name="description" rows=5 cols=80 >
-{{ request.form['description'] or route['description'] }}
-		  </textarea>
+<textarea style="text-align: left;" name="description" rows=5 cols=80 >
+{{ request.form['description'] or route['description'] }} </textarea>
 
           <br>
           <p style="text-align: left;"><br>Route Instructions (<b>format Milage|Instruction or -|Note or #| page break</b>):
 		  </p>
 		    
-          <textarea style="text-align: left;" name="route" rows=18 cols=80 >
 {% if request.form['route'] or route['route'] %}
-{{ request.form['route'] or route['route'] }}
+<textarea style="text-align: left;" name="route" rows=18 cols=80 >{{ request.form['route'] or route['route'] }}</textarea>
 {% else %}
-0.00|Start of event
--|Replace this text with proper event text
+<textarea style="text-align: left;" name="route" rows=18 cols=80 >0.00|Start of event
+-|Replace this text with proper event text</textarea>
 {% endif %}
-		  </textarea>
 
           <br>
           <p style="text-align: left;">Footer (use HTML): </p>
           <textarea style="text-align: left;" name="footer" rows=13 cols=80 >
-{{ request.form['footer'] or route['footer'] }}
-		  </textarea>
+{{ request.form['footer'] or route['footer'] }} </textarea>
 
           <br>
           <p style="text-align: left;">Info (use HTML): </p>
           <textarea style="text-align: left;" name="info" rows=6 cols=80 >
-{{ request.form['info'] or route['info'] }}
-		  </textarea>
+{{ request.form['info'] or route['info'] }} </textarea>
 <br>
 		  <table>
 		  <tr>
