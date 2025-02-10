@@ -17,3 +17,8 @@ The port can be changed by editing route-o-matic.py.
 http://192.168.92.100:8200
 ```
 
+Python modules used:
+waitress
+pymysql
+flask
+

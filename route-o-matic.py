@@ -1,75 +1,19 @@
-import sqlite3
 from flask import Flask
 from flask import render_template
 from flask import request, url_for, flash, redirect
 from waitress import serve
+from mydb import RouteDB
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '3asdfki5489907asLJO8dka378'
+routedb = RouteDB({})
+last_id = 0
+
 
 @app.context_processor
 def inject_verions():
     return dict(version="Version 3.0.0", date="02/08/2025")
-
-#log = open('log.txt', 'w')
-last_id = 0
-
-def log_it(it):
-    print(it)
-    #log.write(f'{it}\n')
-    #log.flush()
-
-def get_db_connection():
-    conn = sqlite3.connect('/volume1/route-o-matic-new/route_db.db')
-    conn.row_factory = sqlite3.Row
-    return conn
-
-def get_route(route_id):
-    conn = get_db_connection()
-    routes = conn.execute(f'SELECT * from routes where id = {route_id}').fetchall()
-    conn.close()
-    return routes
-
-def db_insert(form):
-    title = form['title']
-    owner = form['owner']
-    date = form['date']
-    description = form['description']
-    info = form['info']
-    route = form['route']
-    distance = form['distance']
-    duration = form['duration']
-    map_url = form['map_url']
-    footer = form['footer']
-    rating = ''
-    public = 0
-
-    # add other fields to check
-    if not title: 
-        flash('Title is required!')
-        return False
-    else:
-        # Insert into database
-        flash(f'insert {title} into database')
-        if form['action'] == 'Submit':
-            # insert database record
-            conn = get_db_connection()
-            try:
-                conn.execute("INSERT into routes "
-                    "(title, date, owner, description, route, footer, info, map_url, distance, duration, rating, public) "
-                    "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                    (title, date, owner, description, route, footer, info, map_url, distance, duration, rating, public)
-                )
-                conn.commit()
-            except sqlite3.Error as er:
-                print(er.sqlite_errorcode)
-                print(er.sqlite_errorname)
-                flash(f'Route update failed! {er.sqlite_errorname}')
-                conn.close()
-                return False
-
-            conn.close()
-    return True
 
 class ROUTE:
     def __init__(self, raw):
@@ -179,10 +123,9 @@ class ROUTE:
 @app.route('/routes', methods=('GET', 'POST'))
 def routes():
     global last_id
-    conn = get_db_connection()
+
     print('routes: query db for all routes')
-    routes = conn.execute('SELECT * from routes').fetchall()
-    conn.close()
+    routes = routedb.get_routes()
 
     """
     for r in routes:
@@ -195,29 +138,29 @@ def routes():
         print('In routes for method POST')
         select = request.form.get('Route')
         theroute = request.form['Route']
-        log_it(f'Requsested route /{str(select)}/')
-        log_it(f'Selected route /{str(theroute)}/')
+        print(f'Requsested route /{str(select)}/')
+        print(f'Selected route /{str(theroute)}/')
 
         # looks like id>title
         route_id = int(str(select).split('>')[0])
 
         if request.form['action'] == 'Edit':
-            log_it(f'User wants to edit the route')
+            print(f'User wants to edit the route')
             last_id = route_id
             return redirect(url_for(f'edit', id=route_id))
         elif request.form['action'] == 'Printable':
-            log_it(f'User wants to print the route')
+            print(f'User wants to print the route')
             last_id = route_id
             return redirect(url_for(f'print_route', id=route_id, format="HTML"))
         elif request.form['action'] == 'Copy':
-            log_it(f'User wants to make a copy of the route')
+            print(f'User wants to make a copy of the route')
             return redirect(url_for(f'add_new', id=route_id))
         elif request.form['action'] == 'Delete':
-            log_it(f'User wants to delete the route')
+            print(f'User wants to delete the route')
             return redirect(url_for(f'delete_route', id=route_id))
         else:
-            log_it(f"Don't know what the user wants to do")
-            log_it(f"{request.form['action']}")
+            print(f"Don't know what the user wants to do")
+            print(f"{request.form['action']}")
 
         return redirect(url_for(f'edit', id=route_id))
 
@@ -227,29 +170,32 @@ def routes():
 
 @app.route('/routes/<int:route_id>')
 def route_id(route_id):
-    routes = get_route(route_id)
+    routes = routedb.get_route(route_id)
     return render_template('routes.html', routes=routes)
 
 @app.route('/add', methods=('GET', 'POST'))
 def add():
     if request.method == 'POST':
-        if db_insert(request.form):
-            return redirect(url_for(f'edit', id=id))
+        route_id = routedb.insert_route(request.form)
+        if route_id > 0:
+            # we need the id of the route we just inserted
+            return redirect(url_for(f'edit', id=route_id))
 
     return render_template('add.html', route=None)
 
 @app.route('/add/<int:id>', methods=('GET', 'POST'))
 def add_new(id):
-    route = get_route(id)[0]
+    route = routedb.get_route(id)[0]
 
     if request.method == 'POST':
-        if db_insert(request.form):
+        # should this route back to original or copy?  currently it goes to original
+        if routedb.insert_route(request.form):
             return redirect(url_for(f'edit', id=id))
     return render_template('add.html', route=route)
 
 @app.route('/edit/<int:id>', methods=('GET', 'POST'))
 def edit(id):
-    route = get_route(id)[0]
+    route = routedb.get_route(id)[0]
 
     # convert the row object to a dict so we can remove None values
     r = dict(route)
@@ -257,44 +203,19 @@ def edit(id):
         if r[key] == None:
             r[key] = ''
         if key == 'description':
-            log_it(f'description = {r[key]}')
+            print(f'description = {r[key]}')
         if key == 'date':
-            log_it(f'date = {r[key]}')
+            print(f'date = {r[key]}')
         if key == 'footer':
-            log_it(f'footer = {r[key]}')
+            print(f'footer = {r[key]}')
         if key == 'info':
-            log_it(f'info = {r[key]}')
+            print(f'info = {r[key]}')
 
     if request.method == 'POST':
-        title = request.form['title']
-        owner = request.form['owner']
-        date = request.form['date']
-        description = request.form['description']
-        info = request.form['info']
-        route = request.form['route']
-        distance = request.form['distance']
-        duration = request.form['duration']
-        map_url = request.form['map_url']
-        footer = request.form['footer']
-
         if request.form['action'] == 'Submit':
             # update database record
             flash('Updating database entry')
-            conn = get_db_connection()
-            try:
-                conn.execute('UPDATE routes SET title = ?, owner = ?, date = ?, '
-                        'description = ?, info = ?, route = ?, distance = ?, '
-                        'duration = ?, map_url = ?, footer = ?'
-                        ' WHERE id = ?',
-                        (title, owner, date, description, info, route, distance, duration, map_url, footer, id))
-                conn.commit()
-                flash(f'Route update success!')
-            except sqlite3.Error as er:
-                print(er.sqlite_errorcode)
-                print(er.sqlite_errorname)
-                flash(f'Route update failed! {er.sqlite_errorname}')
-
-            conn.close()
+            routedb.update_route(id, request.form)
             return redirect(url_for(f'edit', id=id))
         elif request.form['action'] == 'Print':
             select = request.form.get('printFormat')
@@ -305,7 +226,7 @@ def edit(id):
 
 @app.route('/print/<int:id>/<string:format>')
 def print_route(id, format):
-    currentRoute = dict(get_route(id)[0])
+    currentRoute = dict(routedb.get_route(id)[0])
     currentRoute['route'] = ROUTE(currentRoute['route'])
 
     return render_template('print.html', currentRoute=currentRoute, format=format)
@@ -322,7 +243,7 @@ def docs():
 def get_description():
 
     route_id = request.args.get('route', 0)
-    route = dict(get_route(route_id)[0])
+    route = dict(routedb.get_route(route_id)[0])
 
     return route['description']
 
@@ -331,25 +252,17 @@ def delete_route(id):
     if request.method == 'POST':
         if request.form['action'] == 'Delete':
             print(f'user confirmed they want to delete {id}')
-            conn = get_db_connection()
-            try:
-                conn.execute(f'DELETE from routes where id = {id}')
-                conn.commit()
-            except sqlite3.Error as er:
-                print(er.sqlite_errorcode)
-                print(er.sqlite_errorname)
-                flash(f'Route delete failed! {er.sqlite_errorname}')
-            conn.close()
+            routedb.delete_route(id)
         else:
             print(f'user confirmed they dont want to delete {id}')
         return redirect(url_for(f'routes'))
 
-    route = dict(get_route(id)[0])
+    route = dict(routedb.get_route(id)[0])
     info = {'id': id, 'title': route['title']}
     return render_template('delete.html', info=info)
 
 
 if __name__ == "__main__":
     #app.run(host='0.0.0.0')
-    serve(app, host='0.0.0.0', port=8201)
+    serve(app, host='0.0.0.0', port=8200)
 
