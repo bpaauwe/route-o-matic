@@ -1,3 +1,5 @@
+import sys
+import getopt
 from flask import Flask
 from flask import render_template
 from flask import request, url_for, flash, redirect
@@ -9,15 +11,27 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = '3asdfki5489907asLJO8dka378'
 routedb = RouteDB({})
 last_id = 0
+port = 8200
 
+options = "p:"
+longoptions = ["port="]
+try:
+    argumentList = sys.argv[1:]
+    arguments, values = getopt.getopt(argumentList, options, longoptions)
+    for currentArgument, currentValue in arguments:
+        if currentArgument in ("-p", "--port"):
+            port = currentValue
+except getopt.error as err:
+    print (str(err))
 
 @app.context_processor
 def inject_verions():
-    return dict(version="Version 3.0.0", date="02/08/2025")
+    return dict(version="Version 3.0.1", date="12/29/2025")
 
 class ROUTE:
     def __init__(self, raw):
         self.raw = raw
+        self.ri = 0
 
     '''
     Process a route instruction line
@@ -26,12 +40,13 @@ class ROUTE:
         td_l = '<tr><td style="padding-right: 10px" align="right">{}</td>'
         td_n = '<td style="padding-right: 10px" align="right">{}</td>'
         td_i = '<td style="padding-left: 10px" align="left">{}</td>'
-        td_x = '<td style="padding-left: 10px" align="left">{}</td></tr>\n'
+        td_x = '<td style="padding-left: 10px" align="left"><i>{}</i></td></tr>\n'
 
         # a line is supposed to look like <code|mileage>|<text>
         # where code is '-' for note, and 'rm' for rallymaster note
         parts = line.split('|')
-        num = line_no + 1
+        #num = line_no + 1
+        num = 0
 
         if len(parts) > 1:
             miles = parts[0]
@@ -54,11 +69,13 @@ class ROUTE:
             if miles == '-':
                 new_line = td_l.format('&nbsp;') + td_n.format('&nbsp;') + td_i.format(text) + td_x.format(extra)
             elif (miles == 'RM' or miles == 'rm') and flag:
-                new_line = td_l.format(num) + td_n.format('') + td_i.format(text) + td_x.format(extra)
+                #num = self.ri + 1
+                new_line = td_l.format('&nbsp;') + td_n.format('') + td_i.format(text) + td_x.format(extra)
             elif miles == 'RM' or miles == 'rm':
                 # ignore these lines
                 new_line = ''
             else: # must be a mileage
+                num = self.ri + 1
                 new_line = td_l.format(num) + td_n.format(miles) + td_i.format(text) + td_x.format(extra)
         else:  # Instruction, but no milage
             miles = ''
@@ -73,8 +90,11 @@ class ROUTE:
             text = text.replace('Y.','<b>Y.</b>')
             text = text.replace('Y,','<b>Y,</b>')
             text = text.replace('CAST','<b>CAST</b>')
+            num = self.ri + 1
             new_line = td_l.format(num) + td_n.format(miles) + td_i.format(text) + td_x.format('')
 
+        if num > 0:
+            self.ri += 1
         return new_line
 
 
@@ -215,6 +235,9 @@ def edit(id):
         if request.form['action'] == 'Submit':
             # update database record
             flash('Updating database entry')
+            print(f"REQUEST FORM")
+            print(f"{request.form}")
+            print(f"END of FORM")
             routedb.update_route(id, request.form)
             return redirect(url_for(f'edit', id=id))
         elif request.form['action'] == 'Print':
@@ -264,5 +287,5 @@ def delete_route(id):
 
 if __name__ == "__main__":
     #app.run(host='0.0.0.0')
-    serve(app, host='0.0.0.0', port=8200)
+    serve(app, host='0.0.0.0', port=port)
 

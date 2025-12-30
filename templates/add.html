@@ -74,7 +74,31 @@
 {{ request.form['description'] or route['description'] }} </textarea>
 
           <br>
-          <p style="text-align: left;"><br>Route Instructions (<b>format Milage|Instruction or -|Note or #| page break</b>):
+          <p style="text-align: left;">
+		  <table border=1>
+			<tr>
+				<td colspan="2"><b>Route Instruction formats</b></td>
+			</tr>
+			<tr>
+				<td>Normal</td><td><b>Mileage</b>|Instruction|Extra</td>
+			</tr>
+			<tr>
+				<td>Blank Mileage</td><td><b>&nbsp</b>|Instruction|Extra</td>
+			</tr>
+			<tr>
+				<td>Note</td><td><b>-</b>|Note|Extra</td>
+			</tr>
+			<tr>
+				<td>Blank Line</td><td><b>-</b>|</td>
+			</tr>
+			<tr>
+				<td>Rallymaster</td><td><b>RM</b>|Instruction|Extra</td>
+			</tr>
+			<tr>
+				<td>Page Break</td><td><b>#</b>|</td>
+			</tr>
+		</table>
+		<!--  (<b>format Milage|Instruction or -|Note or #| page break</b>): -->
 		  </p>
 		    
 {% if request.form['route'] or route['route'] %}

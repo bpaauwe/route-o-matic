@@ -102,6 +102,7 @@ class RouteDB:
         conn = self.OpenDB()
         cur = conn.cursor(pymysql.cursors.DictCursor)
         nf = {}
+        print(f"FOOTER = {fields['footer']}")
 
         # Fix up fields by stripping white space
         for f in fields:
@@ -113,6 +114,7 @@ class RouteDB:
         else:
             distance = float(fields['distance'])
 
+        print(f"MODIFIED FOOTER = {nf['footer']}")
 
         try:
 
@@ -123,6 +125,7 @@ class RouteDB:
 
             print(f'{query}')
             cur.execute(query)
+            conn.commit()
 
         except pymysql.Error as er:
             print(er)
