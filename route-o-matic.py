@@ -11,7 +11,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = '3asdfki5489907asLJO8dka378'
 routedb = RouteDB({})
 last_id = 0
-port = 8200
+port = 80
+public = True
 
 options = "p:"
 longoptions = ["port="]
@@ -26,7 +27,7 @@ except getopt.error as err:
 
 @app.context_processor
 def inject_verions():
-    return dict(version="Version 3.0.1", date="12/29/2025")
+    return dict(version="Version 3.0.1p", date="12/31/2025")
 
 class ROUTE:
     def __init__(self, raw):
@@ -167,26 +168,43 @@ def routes():
         if request.form['action'] == 'Edit':
             print(f'User wants to edit the route')
             last_id = route_id
-            return redirect(url_for(f'edit', id=route_id))
+            if public:
+                return redirect(url_for(f'public', id=route_id))
+            else:
+                return redirect(url_for(f'edit', id=route_id))
         elif request.form['action'] == 'Printable':
             print(f'User wants to print the route')
+            print(f'Print format = {request.form["printFormat"]}')
+            print_format = request.form['printFormat']
             last_id = route_id
-            return redirect(url_for(f'print_route', id=route_id, format="HTML"))
+            return redirect(url_for(f'print_route', id=route_id, format=print_format))
         elif request.form['action'] == 'Copy':
             print(f'User wants to make a copy of the route')
             return redirect(url_for(f'add_new', id=route_id))
         elif request.form['action'] == 'Delete':
             print(f'User wants to delete the route')
-            return redirect(url_for(f'delete_route', id=route_id))
+            if public:
+                return redirect(url_for(f'public', id=route_id))
+            else:
+                return redirect(url_for(f'delete_route', id=route_id))
         else:
             print(f"Don't know what the user wants to do")
             print(f"{request.form['action']}")
 
-        return redirect(url_for(f'edit', id=route_id))
+        if public:
+            return redirect(url_for(f'public', id=route_id))
+        else:
+            return redirect(url_for(f'edit', id=route_id))
 
     print(f'render routes.html with {len(routes)} routes and last={last_id}')
+    print('first = {} - {}'.format(routes[1]['id'], routes[1]['title']))
+    #print('all {}'.format(routes))
     return render_template('routes.html', routes=routes, last_id=last_id)
 
+
+@app.route('/public', methods=('GET', 'POST'))
+def public(id=None):
+    return render_template('public.html')
 
 @app.route('/routes/<int:route_id>')
 def route_id(route_id):
@@ -245,7 +263,10 @@ def edit(id):
             print(f"User wants to print using {select}")
             return redirect(url_for(f'print_route', id=id, format=select))
 
-    return render_template('add.html', route=r)
+    if public:
+        return render_template('public.html')
+    else:
+        return render_template('add.html', route=r)
 
 @app.route('/print/<int:id>/<string:format>')
 def print_route(id, format):
@@ -266,9 +287,14 @@ def docs():
 def get_description():
 
     route_id = request.args.get('route', 0)
+    raw_route = routedb.get_route(route_id)
+    #print('raw = {}'.format(raw_route[0]))
+    #print('desciption = {}'.format(raw_route[0][4]))
+
     route = dict(routedb.get_route(route_id)[0])
 
     return route['description']
+    #return raw_route[0][4]
 
 @app.route('/delete/<int:id>', methods=('GET', 'POST'))
 def delete_route(id):

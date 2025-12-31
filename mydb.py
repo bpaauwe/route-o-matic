@@ -1,6 +1,7 @@
 from flask import flash
-import pymysql
-import pymysql.cursors
+import sqlite3
+#import pymysql
+#import pymysql.cursors
 from pymysql.converters import escape_string
 '''
 what do we need for external database commands?
@@ -21,14 +22,12 @@ class RouteDB:
                 'database':'bobsplace'
         }
         self.db = None
+        self.tuple_keys = ('id', 'title', 'date', 'owner', 'description',
+                'route', 'footer', 'info', 'map_url', 'map', 'distance',
+                'duration', 'rating', 'public')
 
     def OpenDB(self):
-        db = pymysql.connect(
-                host = self.config['host'],
-                user = self.config['user'],
-                password = self.config['password'],
-                database = self.config['database']
-                )
+        db = sqlite3.connect('route_db.db')
         return db
 
 
@@ -37,13 +36,19 @@ class RouteDB:
     '''
     def get_route(self, route):
         conn = self.OpenDB()
-        cur = conn.cursor(pymysql.cursors.DictCursor)
+        cur = conn.cursor()
         cur.execute(f'SELECT * from routes where id = {route}')
         result = cur.fetchall()
         cur.close()
         conn.close()
 
-        return result
+        # for sqlite3, this is an array with a single tuple
+        # holding the record.  What we want to return is a
+        # dict/json like structure
+
+        inner_dict = dict(zip(self.tuple_keys, result[0]))
+
+        return [inner_dict]
 
     '''
     Get a list of all the routes in the database. 
@@ -52,13 +57,18 @@ class RouteDB:
     '''
     def get_routes(self):
         conn = self.OpenDB()
-        cur = conn.cursor(pymysql.cursors.DictCursor)
+        cur = conn.cursor()
         cur.execute(f'SELECT * from routes')
         result = cur.fetchall()
         cur.close()
         conn.close()
 
-        return result
+        ret = []
+        for route in result:
+            element = dict(zip(self.tuple_keys, route))
+            ret.append(element)
+
+        return ret
 
     '''
     Insert a new route into the database.
@@ -69,7 +79,7 @@ class RouteDB:
         route_id = 0
 
         conn = self.OpenDB()
-        cur = conn.cursor(pymysql.cursors.DictCursor)
+        cur = conn.cursor()
 
         # fix up distance - needs to be float, not string
         if fields['distance'] == '':
@@ -100,7 +110,7 @@ class RouteDB:
     '''
     def update_route(self, route_id, fields):
         conn = self.OpenDB()
-        cur = conn.cursor(pymysql.cursors.DictCursor)
+        cur = conn.cursor()
         nf = {}
         print(f"FOOTER = {fields['footer']}")
 
@@ -140,7 +150,7 @@ class RouteDB:
     '''
     def delete_route(self, route):
         conn = self.OpenDB()
-        cur = conn.cursor(pymysql.cursors.DictCursor)
+        cur = conn.cursor()
         try:
             cur.execute(f'DELETE from routes where id = {route}')
             cur.close()

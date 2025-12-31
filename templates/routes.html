@@ -18,15 +18,36 @@
 			{% if last_id == route['id'] %}
 			<option selected value="{{route['id']}}">{{route['id']}} - {{route['title']}}</option>
 			{% else %}
-			<option value="{{route['id']}}">{{route['id']}} - {{route['title']}}</option>
+			<option value="{{route['id']}}">{{route['id']}} - {{route['title']}}</option> 
+			<!-- <option value="{{route[0]}}">{{route[0]}} - {{route[1]}}</option> -->
 			{% endif %}
 		{% endfor %}
         </select>
 		</td>
 		<td><input type="submit" name="action" class="btn btn-primary" value="Edit"></td>
-		<td><input type="submit" name="action" class="btn btn-primary" value="Copy"></td>
-		<td><input type="submit" name="action" class="btn btn-primary" value="Printable"></td>
 		<td><input type="submit" name="action" class="btn btn-primary" value="Delete"></td>
+		<td>
+			<select name="printFormat", id="printFormat">
+				{% if printformat == 'default' %}
+					<option selected value="HTML"">default</option>
+				{% else %}
+					<option value="HTML"">default</option>
+				{% endif %}
+
+				{% if printformat == 'PCA' %}
+					<option selected value="PCA"">Spreadsheet</option>
+				{% else %}
+					<option value="PCA"">Spreadsheet</option>
+				{% endif %}
+
+				{% if printformat == 'RM' %}
+					<option selected value="PCA"">RallyMaster</option>
+				{% else %}
+					<option value="RM"">RallyMaster</option>
+				{% endif %}
+			</select>
+		</td>
+		<td><input type="submit" name="action" class="btn btn-primary" value="Printable"></td>
 		</tr>
 		<tr>
 		<td colspan=5>
