@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+	<p>
+	Sign in for additional features
+	<form method="POST">
+		<table>
+			<tr>
+				<td>Username:</td>
+				<td><input type="text" name="user" value=""></td>
+			</tr>
+			<tr>
+				<td>Password:</td>
+				<td><input type="password" name="password" value=""></td>
+			</tr>
+			<tr>
+		<td><input type="submit" name="action" class="btn btn-primary" value="Login"></td>
+		<td><input type="submit" name="action" class="btn btn-primary" value="Cancel"></td>
+			</tr>
+		</table>
+  </form>
+{% endblock %}

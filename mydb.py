@@ -137,9 +137,9 @@ class RouteDB:
             cur.execute(query)
             conn.commit()
 
-        except pymysql.Error as er:
-            print(er)
-            flash(f'Route update failed! {er}')
+        # how do we trap errors for sqlite3?
+        except:
+            flash(f'Route update failed! (why?)')
             cur.close()
             conn.close()
             return False

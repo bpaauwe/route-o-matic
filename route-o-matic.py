@@ -12,7 +12,10 @@ app.config['SECRET_KEY'] = '3asdfki5489907asLJO8dka378'
 routedb = RouteDB({})
 last_id = 0
 port = 80
-public = True
+print(f'Initializing PUBLIC to true')
+PUBLIC = True
+PASSWORD = '123456'
+USER = 'BobP'
 
 options = "p:"
 longoptions = ["port="]
@@ -168,9 +171,9 @@ def routes():
         if request.form['action'] == 'Edit':
             print(f'User wants to edit the route')
             last_id = route_id
-            if public:
-                return redirect(url_for(f'edit', id=route_id))
-                #return redirect(url_for(f'public', id=route_id))
+            if PUBLIC:
+                print(f'Action = Edit, public = {PUBLIC}')
+                return redirect(url_for(f'public'))
             else:
                 return redirect(url_for(f'edit', id=route_id))
         elif request.form['action'] == 'Printable':
@@ -184,7 +187,8 @@ def routes():
             return redirect(url_for(f'add_new', id=route_id))
         elif request.form['action'] == 'Delete':
             print(f'User wants to delete the route')
-            if public:
+            if PUBLIC:
+                print(f'Action = Delete, public = true')
                 return redirect(url_for(f'public', id=route_id))
             else:
                 return redirect(url_for(f'delete_route', id=route_id))
@@ -192,11 +196,7 @@ def routes():
             print(f"Don't know what the user wants to do")
             print(f"{request.form['action']}")
 
-        if public:
-            return redirect(url_for(f'edit', id=route_id))
-            #return redirect(url_for(f'public', id=route_id))
-        else:
-            return redirect(url_for(f'edit', id=route_id))
+        return redirect(url_for(f'edit', id=route_id))
 
     print(f'render routes.html with {len(routes)} routes and last={last_id}')
     print('first = {} - {}'.format(routes[1]['id'], routes[1]['title']))
@@ -265,10 +265,12 @@ def edit(id):
             print(f"User wants to print using {select}")
             return redirect(url_for(f'print_route', id=id, format=select))
 
-    if public:
+    # method GET
+    if PUBLIC:
         return render_template('public.html')
     else:
         return render_template('add.html', route=r)
+
 
 @app.route('/print/<int:id>/<string:format>')
 def print_route(id, format):
@@ -297,6 +299,25 @@ def get_description():
 
     return route['description']
     #return raw_route[0][4]
+
+@app.route('/login', methods=('GET', 'POST'))
+def login():
+    global PUBLIC
+    if request.method == 'POST':
+        if request.form['action'] == 'Login':
+            print(f'Do login stuff now')
+            if request.form['user'] == USER and request.form['password'] == PASSWORD:
+                # is this PUBLIC not the same as global PUBLIC?
+                print(f'Valid login, public = {PUBLIC} init')
+                PUBLIC = False
+                print(f'Valid login, public = {PUBLIC} now')
+
+        else:
+            print(f'Cancel login request')
+
+        return redirect(url_for(f'routes'))
+
+    return render_template('login.html')
 
 @app.route('/delete/<int:id>', methods=('GET', 'POST'))
 def delete_route(id):
