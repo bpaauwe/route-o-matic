@@ -1,16 +1,29 @@
+'''
+Convert the route data in the mariadb database and insert it
+into a sqlite3 database.
+'''
+
 import sqlite3
-import mysql.connector
+import pymysql
+import pymysql.cursors
+from pymysql.converters import escape_string
 
-oldroutes = mysql.connector.connect(
-        host='sirius.bobsplace.com',
-        user='route',
-        password='routes4cars',
-        database='bobsplace'
-        )
+#import mysql.connector
 
-cursor = oldroutes.cursor()
+oldroutes = pymysql.connect(
+                host = 'sirius.bobsplace.com',
+                user = 'route',
+                password = 'routes4cars',
+                database = 'bobsplace'
+                )
+
+
+cursor = oldroutes.cursor(pymysql.cursors.DictCursor)
 cursor.execute("SELECT * from routes")
 result = cursor.fetchall()
+cursor.close()
+oldroutes.close()
+
 
 '''
 results:
@@ -30,38 +43,56 @@ results:
     13 rate
     14 public
 '''
-#print(f'{result[0][1]} {result[0][14]}')
+#print(f'{result[0][1]} {result[0][10]} {result[0][11]} {result[0][14]}')
 for x in result:
-    l = list(x)
-    print(type(l))
-    print(f'{l[1]} {l[2]} {l[10]} {l[9]}')
+    # x is a dictionary {'id':1, 'title':'a title'...}
+    # if we convert it to a list we get a list of field names
+    #  ['id', 'title', 'date', 'owner', 'description', 'route', 'footer', 'info', 'map_url', 'map', 'this', 'what', 'distance', 'duration', 'rating', 'public']
+    # so I think we want to use:
+    #  x['id'] to get the value
+    #l = list(x)
+    #print('list = {}'.format(l))
+    #print(f'TEST ... {l[1]} {l[2]} {l[10]} {l[11]}')
+
+    print('X = {} - {}'.format(x['id'], x['title']))
+    for key in x:
+        print(f'key = {key}')
 
 connection = sqlite3.connect('route_db.db')
 
-with open('schema.sql') as f:
-    connection.executescript(f.read())
-
+try:
+    with open('schema.sql') as f:
+        connection.executescript(f.read())
+except:
+    print(f'Table routes already exists')
 
 cur = connection.cursor()
 
 #insert records here
 for x in result:
-    l = list(x)
-    for d in range(0, len(l)):
-        if d == 10 and l[d] == None:
-            l[d] = 0.0
-        if d == 9 and l[d] == None:
-            l[d] = b''
-        if d == 12 and l[d] == None:
-            l[d] = 0
-        if d == 14 and l[d] == None:
-            l[d] = 0
-        if l[d] == None:
-            l[d] = ''
-        print(f'type of {d} = {type(l[d])}')
+    # convert None values to 0 or ''
+    for key in x:
+        if x[key] == None:
+            if key == 'map': x[key] = ''
+            if key == 'what': x[key] = 0
+            if key == 'distance': x[key] = 0.0
+            if key == 'duration': x[key] = ''
+            if key == 'info': x[key] = ''
+            if key == 'footer': x[key] = ''
+            if key == 'map_url': x[key] = ''
+        # strip leading/trailing white space from titles
+        if key == 'title':
+            x[key] = x[key].strip()
+        if key == 'description':
+            x[key] = x[key].replace('eâ€™', '\'')
+            x[key] = x[key].replace('Ã¢â‚¬â„¢', '\'')
+            x[key] = escape_string(x[key])
+
 
     cur.execute("INSERT into routes(title, date, owner, description, route, footer, info, map_url, map, distance, duration, rating, public) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (l[1], l[2], l[3], l[4], l[5], l[6], l[7], l[8], l[9], float(l[10]), l[11], l[12], l[14])
+            (x['title'], x['date'], x['owner'], x['description'],
+             x['route'], x['footer'], x['info'], x['map_url'], x['map'],
+             float(x['distance']), x['duration'], x['rating'], x['public'])
             )
 
 '''
