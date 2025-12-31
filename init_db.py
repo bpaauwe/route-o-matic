@@ -55,8 +55,10 @@ for x in result:
     #print(f'TEST ... {l[1]} {l[2]} {l[10]} {l[11]}')
 
     print('X = {} - {}'.format(x['id'], x['title']))
+    '''
     for key in x:
         print(f'key = {key}')
+    '''
 
 connection = sqlite3.connect('route_db.db')
 
@@ -86,20 +88,17 @@ for x in result:
         if key == 'description':
             x[key] = x[key].replace('eâ€™', '\'')
             x[key] = x[key].replace('Ã¢â‚¬â„¢', '\'')
-            x[key] = escape_string(x[key])
+            # x[key] = escape_string(x[key]) not needed?
+        if key == 'date':
+            x[key] = x[key].strftime('%Y-%m-%d')
 
+    sql_query = "INSERT INTO routes(title, date, owner, description, route, footer, info, map_url, map, distance, duration, rating, public) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
-    cur.execute("INSERT into routes(title, date, owner, description, route, footer, info, map_url, map, distance, duration, rating, public) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    cur.execute(sql_query,
             (x['title'], x['date'], x['owner'], x['description'],
              x['route'], x['footer'], x['info'], x['map_url'], x['map'],
              float(x['distance']), x['duration'], x['rating'], x['public'])
             )
-
-'''
-cur.execute("INSERT into routes(title...) VALUES (?...)",
-        (data, data, data)
-        )
-'''
 
 connection.commit()
 connection.close()
