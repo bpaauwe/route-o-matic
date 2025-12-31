@@ -169,7 +169,8 @@ def routes():
             print(f'User wants to edit the route')
             last_id = route_id
             if public:
-                return redirect(url_for(f'public', id=route_id))
+                return redirect(url_for(f'edit', id=route_id))
+                #return redirect(url_for(f'public', id=route_id))
             else:
                 return redirect(url_for(f'edit', id=route_id))
         elif request.form['action'] == 'Printable':
@@ -192,7 +193,8 @@ def routes():
             print(f"{request.form['action']}")
 
         if public:
-            return redirect(url_for(f'public', id=route_id))
+            return redirect(url_for(f'edit', id=route_id))
+            #return redirect(url_for(f'public', id=route_id))
         else:
             return redirect(url_for(f'edit', id=route_id))
 
