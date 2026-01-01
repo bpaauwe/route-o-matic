@@ -15,11 +15,13 @@
 		<td>
         <select name="Route" id="Route">
 		{% for route in routes %}
+			{% if route['public'] == 1 %}
 			{% if last_id == route['id'] %}
 			<option selected value="{{route['id']}}">{{route['id']}} - {{route['title']}}</option>
 			{% else %}
 			<option value="{{route['id']}}">{{route['id']}} - {{route['title']}}</option> 
 			<!-- <option value="{{route[0]}}">{{route[0]}} - {{route[1]}}</option> -->
+			{% endif %}
 			{% endif %}
 		{% endfor %}
         </select>
