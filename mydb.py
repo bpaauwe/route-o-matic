@@ -37,7 +37,7 @@ class RouteDB:
     def get_route(self, route):
         conn = self.OpenDB()
         cur = conn.cursor()
-        cur.execute(f'SELECT * from routes where id = {route}')
+        cur.execute(f'SELECT id,title,date,owner,description,route,footer,info,map_url,map,distance,duration,rating,public from routes where id = {route}')
         result = cur.fetchall()
         cur.close()
         conn.close()
@@ -58,7 +58,7 @@ class RouteDB:
     def get_routes(self):
         conn = self.OpenDB()
         cur = conn.cursor()
-        cur.execute(f'SELECT * from routes')
+        cur.execute(f'SELECT id,title,date,owner,description,route,footer,info,map_url,map,distance,duration,rating,public from routes')
         result = cur.fetchall()
         cur.close()
         conn.close()
