@@ -300,6 +300,24 @@ def get_description():
     return route['description']
     #return raw_route[0][4]
 
+@app.route('/_get_footer')
+def get_footer():
+
+    route_id = request.args.get('route', 0)
+    raw_route = routedb.get_route(route_id)
+    route = dict(routedb.get_route(route_id)[0])
+
+    return route['footer']
+
+@app.route('/_get_info')
+def get_info():
+
+    route_id = request.args.get('route', 0)
+    raw_route = routedb.get_route(route_id)
+    route = dict(routedb.get_route(route_id)[0])
+
+    return route['info']
+
 @app.route('/login', methods=('GET', 'POST'))
 def login():
     global PUBLIC

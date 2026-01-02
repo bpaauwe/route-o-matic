@@ -59,6 +59,18 @@
         </textarea>
 		</td>
 		</tr>
+		<tr>
+		<td colspan=5>
+		<textarea style="text-align: left;" name="r_foot" id="r_foot" rows=10 cols=80 >
+        </textarea>
+		</td>
+		</tr>
+		<tr>
+		<td colspan=5>
+		<textarea style="text-align: left;" name="r_info" id="r_info" rows=5 cols=80 >
+        </textarea>
+		</td>
+		</tr>
 		</table>
       </div>
     </div>
@@ -70,7 +82,9 @@
 <script charset="utf-8" type="text/javascript">
 	$(function() {
 		var route_select = $('#Route'),
-			textarea = $('#r_desc');
+			desc = $('#r_desc');
+			foot = $('#r_foot');
+			info = $('#r_info');
 
 		route_select.on('change', function() {
 			getRouteDescription();
@@ -80,9 +94,18 @@
 			var send = { route: route_select.val() };
 
 			$.get("/_get_description", send, function(response) {
-				textarea.val(response);
+				desc.val(response);
+			});
+
+			$.get("/_get_footer", send, function(response) {
+				foot.val(response);
+			});
+
+			$.get("/_get_info", send, function(response) {
+				info.val(response);
 			});
 		}
+
 	});
 </script>
 {% endblock scripts %}
