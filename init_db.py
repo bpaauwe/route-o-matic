@@ -75,13 +75,20 @@ for x in result:
     # convert None values to 0 or ''
     for key in x:
         if x[key] == None:
+            if key == 'title': x[key] = ''
+            if key == 'date': x[key] = ''
+            if key == 'owner': x[key] = ''
+            if key == 'description': x[key] = ''
+            if key == 'route': x[key] = ''
+            if key == 'footer': x[key] = ''
+            if key == 'info': x[key] = ''
+            if key == 'map_url': x[key] = ''
             if key == 'map': x[key] = ''
-            if key == 'what': x[key] = 0
+            #if key == 'what': x[key] = 0
             if key == 'distance': x[key] = 0.0
             if key == 'duration': x[key] = ''
-            if key == 'info': x[key] = ''
-            if key == 'footer': x[key] = ''
-            if key == 'map_url': x[key] = ''
+            if key == 'rating': x[key] = 0
+            if key == 'public': x[key] = 0
         # strip leading/trailing white space from titles
         if key == 'title':
             x[key] = x[key].strip()
